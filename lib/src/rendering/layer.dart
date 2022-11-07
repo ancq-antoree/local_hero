@@ -54,7 +54,7 @@ class LocalHeroLayer extends ContainerLayer {
     Offset localPosition, {
     required bool onlyFirst,
   }) {
-    if (!controller.link.leaderConnected) {
+    if (controller.link.leader == null) {
       return false;
     }
     final Offset? transformedOffset = _transformOffset<S>(localPosition);
@@ -104,11 +104,14 @@ class LocalHeroLayer extends ContainerLayer {
   void _establishTransform() {
     _lastTransform = null;
     // Check to see if we are linked.
-    if (!controller.link.leaderConnected) {
+    if (controller.link.leader == null) {
       return;
     }
     // If we're linked, check the link is valid.
-    if (controller.link.debugLeader?.owner != owner) {
+    assert(controller.link.leader!.owner == owner,
+        'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.');
+    // If we're linked, check the link is valid.
+    if (controller.link.leader!.owner != owner) {
       return;
     }
     // Collect all our ancestors into a Set so we can recognize them.
@@ -120,7 +123,7 @@ class LocalHeroLayer extends ContainerLayer {
     }
     // Collect all the layers from a hypothetical child (null) of the target
     // layer up to the common ancestor layer.
-    ContainerLayer layer = controller.link.debugLeader!;
+    ContainerLayer layer = controller.link.leader!;
     final List<ContainerLayer?> forwardLayers = <ContainerLayer?>[null, layer];
     do {
       layer = layer.parent!;
@@ -168,7 +171,7 @@ class LocalHeroLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
-    if (!controller.link.leaderConnected) {
+    if (controller.link.leader == null) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
